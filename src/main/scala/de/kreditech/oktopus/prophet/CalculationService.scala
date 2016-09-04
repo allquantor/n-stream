@@ -42,15 +42,18 @@ trait CalculationService extends BaseService with Protocol {
   // Here, we inject a default response which could be an average resource response.
 
   private val calcFlow: Flow[ResourceCalculationProposalRequest,
-                             ResourceResponse,
-                             _] =
+    ResourceResponse, _] =
     Flow[ResourceCalculationProposalRequest].map { r =>
       ResourceResponse(1, 1, 1)
     }.recoverWithRetries(5, recovery)
 
   // The supervision strategy if the stream will fail.
   private val decider: Supervision.Decider = {
-    case _: IllegalArgumentException => Supervision.Restart
-    case _ => Supervision.Stop
+    case e: IllegalArgumentException =>
+      log.error("An exception occured during the calculation. Supervision strategy for:", e)
+      Supervision.Restart
+    case _ =>
+      log.error("Unexpected Error, Stream processing is stopped")
+      Supervision.Stop
   }
 }
