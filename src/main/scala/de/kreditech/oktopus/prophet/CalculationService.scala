@@ -10,7 +10,6 @@ trait CalculationService extends BaseService with Protocol {
 
   import System._
 
-
   protected val standardRoute = path("proposal") {
     post {
       entity(as[ResourceCalculationProposalRequest]) { req =>
