@@ -3,6 +3,7 @@ package de.kreditech.oktopus.prophet
 import akka.http.scaladsl.model.{ContentTypes, StatusCodes}
 import akka.http.scaladsl.server.{MalformedRequestContentRejection, UnsupportedRequestContentTypeRejection}
 import de.kreditech.oktopus.prophet.ProtocolTypes.ResourceResponse
+import de.kreditech.oktopus.prophet.calculation.CalculationService
 
 class CalculationServiceTest
   extends ServiceTestBase

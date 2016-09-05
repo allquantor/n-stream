@@ -1,10 +1,11 @@
-package de.kreditech.oktopus.prophet
+package de.kreditech.oktopus.prophet.calculation
 
 import akka.NotUsed
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorAttributes, Graph, SourceShape, Supervision}
 import de.kreditech.oktopus.prophet.ProtocolTypes.{ResourceCalculationProposalRequest, ResourceResponse}
+import de.kreditech.oktopus.prophet.{BaseService, Protocol, System}
 
 trait CalculationService extends BaseService with Protocol {
 
@@ -15,7 +16,6 @@ trait CalculationService extends BaseService with Protocol {
       entity(as[ResourceCalculationProposalRequest]) { req =>
         log.info(
           s"Incoming request to process resource calculation for: ${req}")
-
         val calculationStream = Source
           .single(req)
           .via(calcFlow)
@@ -33,7 +33,7 @@ trait CalculationService extends BaseService with Protocol {
   // only the inner body should be changed. Stick to the types will ensure the further calculation.
   private val recovery: PartialFunction[Throwable, Graph[SourceShape[ResourceResponse], NotUsed]] = {
     case e: Throwable => {
-      log.error("An error during the calculation.", e)
+      log.error("An error during the calculation.", e.getStackTrace)
       Source.single(ResourceResponse(3, 10000, 10000))
     }
   }
@@ -44,6 +44,7 @@ trait CalculationService extends BaseService with Protocol {
   private val calcFlow: Flow[ResourceCalculationProposalRequest,
     ResourceResponse, _] =
     Flow[ResourceCalculationProposalRequest].map { r =>
+      //TODO: Appropriate calculation mechanism here.
       ResourceResponse(1, 1, 1)
     }.recoverWithRetries(5, recovery)
 
