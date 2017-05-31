@@ -1,4 +1,4 @@
-package de.kreditech.oktopus.prophet
+package io.allquantor.nstream
 
 import akka.event.LoggingAdapter
 

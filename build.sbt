@@ -1,49 +1,74 @@
-name := """prophet"""
-organization := "de.kreditech.oktopus"
+name := """nstream"""
+organization := "io.allquantor"
 version := "0.0.1"
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.2"
+
+crossScalaVersions := Seq("2.11.8", "2.12.2")
+
 scalacOptions := Seq("-unchecked",
                      "-feature",
                      "-deprecation",
                      "-encoding",
-                     "utf8")
+                     "utf8",
+                      "-Xfatal-warnings")
+
 
 resolvers += Resolver.jcenterRepo
 
+
+
+
 libraryDependencies ++= {
+
+
   val scalazV = "7.3.0-M2"
-  val akkaV = "2.4.9"
-  val scalaTestV = "3.0.0-M15"
-  val scalaMockV = "3.2.2"
-  val scalazScalaTestV = "0.3.0"
-  val malletV = "2.0.8"
-  val appacheMathV = "3.6.1"
-  Seq(
-    "org.scalaz" %% "scalaz-core" % scalazV,
-    "com.typesafe.akka" %% "akka-http-core" % akkaV,
-    "com.typesafe.akka" %% "akka-http-experimental" % akkaV,
-    "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
-    "cc.mallet" % "mallet" % malletV,
-    "org.apache.commons" % "commons-math3" % appacheMathV,
-    "org.scalatest" %% "scalatest" % scalaTestV % "it,test",
-    "org.scalamock" %% "scalamock-scalatest-support" % scalaMockV % "it,test",
-    "org.scalaz" %% "scalaz-scalacheck-binding" % scalazV % "it,test",
-    "org.typelevel" %% "scalaz-scalatest" % scalazScalaTestV % "it,test",
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "it,test"
+  val akkaV = "2.5.0"
+  val scalaTestV = "3.0.0"
+  val akkaHttpV = "10.0.6"
+  val kafkaStreamV = "0.16"
+  val msgPack4z = "0.3.7"
+  val cirleVersion = "0.8.0"
+
+
+  lazy val circleDep = Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-parser",
+    "io.circe" %% "circe-generic"
+  ).map(_ % cirleVersion)
+
+
+  lazy val akkaDep = Seq(
+    "com.typesafe.akka" %% "akka-stream" % akkaV,
+
+    "com.typesafe.akka" %% "akka-testkit" % akkaV,
+
+    // https://mvnrepository.com/artifact/com.typesafe.akka/akka-stream-testkit_2.11
+    "com.typesafe.akka" %% "akka-stream-testkit" % akkaV,
+
+    // https://mvnrepository.com/artifact/com.typesafe.akka/akka-http_2.11
+    "com.typesafe.akka" %% "akka-http" % akkaHttpV,
+
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV,
+
+    "com.typesafe.akka" %% "akka-http-xml" % akkaHttpV,
+
+    // tauschen gegen hseebergers
+    "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
+
+    "com.typesafe.akka" %% "akka-stream-kafka" % kafkaStreamV
   )
+
+  lazy val testingDep = Seq (
+    "org.scalatest" %% "scalatest" % "3.0.3" % "test"
+  )
+
+   circleDep ++ akkaDep ++ testingDep
 }
 
 lazy val root = project.in(file(".")).configs(IntegrationTest)
-Defaults.itSettings
-Revolver.settings
-enablePlugins(JavaAppPackaging)
 
 initialCommands :=
-  """|import scalaz._
-    |import Scalaz._
-    |import akka.actor._
-    |import akka.pattern._
-    |import akka.util._
+  """
     |import scala.concurrent._
     |import scala.concurrent.duration._""".stripMargin
 

@@ -1,0 +1,22 @@
+<nmaprun xmloutputversion="1.04" version="7.40" startstr="Sun May 28 00:01:52 2017" start="1495922512" args="/usr/local/bin/nmap -T5 -p 1-1024 -sV --webxml -oX - 79.200.204.235" scanner="nmap">
+    <scaninfo services="1-1024" numservices="1024" protocol="tcp" type="connect"/>
+    <verbose level="0"/>
+    <debugging level="0"/>
+    <host endtime="1495922568" starttime="1495922512"><status reason_ttl="0" reason="syn-ack" state="up"/>
+        <address addrtype="ipv4" addr="79.200.204.235"/>
+        <hostnames>
+            <hostname type="PTR" name="p4FC8CCEB.dip0.t-ipconnect.de"/>
+        </hostnames>
+        <ports><extraports count="978" state="filtered">
+            <extrareasons count="978" reason="no-responses"/>
+        </extraports>
+            <extraports count="45" state="closed">
+                <extrareasons count="45" reason="conn-refused"/>
+            </extraports>
+            <port portid="443" protocol="tcp"><state reason_ttl="0" reason="syn-ack" state="open"/><service conf="10" method="probed" tunnel="ssl" devicetype="broadband router" product="FRITZ!Box http config" name="http"/></port>
+        </ports>
+        <times to="50000" rttvar="1793" srtt="34739"/>
+    </host>
+    <runstats><finished exit="success" summary="Nmap done at Sun May 28 00:02:48 2017; 1 IP address (1 host up) scanned in 56.67 seconds" elapsed="56.67" timestr="Sun May 28 00:02:48 2017" time="1495922568"/><hosts total="1" down="0" up="1"/>
+    </runstats>
+</nmaprun>
