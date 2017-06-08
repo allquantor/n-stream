@@ -1,20 +1,17 @@
-package io.allquantor.nstream.system
-
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import io.allquantor.nstream.BaseComponent
 
-object SystemConfig {
 
+object TestSystem {
   private lazy val config = ConfigFactory.load()
-  implicit val system = ActorSystem("Nstream", config)
+  implicit val system = ActorSystem("Nstream-IT", config)
   implicit val materializer = ActorMaterializer()
 
-  trait LoggerExecutor extends BaseComponent {
+  trait LoggerExecutor {
     implicit val executor = system.dispatcher
-    implicit val log = Logging(system, "nstream-app")
+    implicit val log = Logging(system, "nstream-it")
   }
 
 }

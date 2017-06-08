@@ -1,82 +1,55 @@
-name := """nstream"""
-organization := "io.allquantor"
-version := "0.0.1"
-scalaVersion := "2.12.2"
 
-crossScalaVersions := Seq("2.11.8", "2.12.2")
+import Dependencies._
+import sbt.Keys.mainClass
 
-scalacOptions := Seq("-unchecked",
-                     "-feature",
-                     "-deprecation",
-                     "-encoding",
-                     "utf8",
-                      "-Xfatal-warnings")
+//name := """n-stream"""
+organization in Global := "io.perseus"
 
+crossScalaVersions in Global := Seq("2.12.2", "2.11.8")
 
-resolvers += Resolver.jcenterRepo
+scalaVersion in Global := crossScalaVersions.value.head
 
+lazy val nstream = project.in(file("."))
+  .settings(
+    name := "n-stream"
+  )
+  .settings(
+    libraryDependencies ++= restDeps ++ nlibDeps,
+    mainClass in Compile := Some("io.allquantor.nstream.Main")
+  )
+  .aggregate(transport)
+  .enablePlugins(sbtdocker.DockerPlugin, JavaServerAppPackaging)
 
-
-
-libraryDependencies ++= {
-
-
-  val scalazV = "7.3.0-M2"
-  val akkaV = "2.5.0"
-  val scalaTestV = "3.0.0"
-  val akkaHttpV = "10.0.6"
-  val kafkaStreamV = "0.16"
-  val msgPack4z = "0.3.7"
-  val cirleVersion = "0.8.0"
-
-
-  lazy val circleDep = Seq(
-    "io.circe" %% "circe-core",
-    "io.circe" %% "circe-parser",
-    "io.circe" %% "circe-generic"
-  ).map(_ % cirleVersion)
-
-
-  lazy val akkaDep = Seq(
-    "com.typesafe.akka" %% "akka-stream" % akkaV,
-
-    "com.typesafe.akka" %% "akka-testkit" % akkaV,
-
-    // https://mvnrepository.com/artifact/com.typesafe.akka/akka-stream-testkit_2.11
-    "com.typesafe.akka" %% "akka-stream-testkit" % akkaV,
-
-    // https://mvnrepository.com/artifact/com.typesafe.akka/akka-http_2.11
-    "com.typesafe.akka" %% "akka-http" % akkaHttpV,
-
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV,
-
-    "com.typesafe.akka" %% "akka-http-xml" % akkaHttpV,
-
-    // tauschen gegen hseebergers
-    "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
-
-    "com.typesafe.akka" %% "akka-stream-kafka" % kafkaStreamV
+lazy val data = project.in(file("data"))
+  .settings(
+    name := "n-stream-data"
   )
 
-  lazy val testingDep = Seq (
-    "org.scalatest" %% "scalatest" % "3.0.3" % "test"
-  )
+lazy val nlib = project.in(file("nlib"))
+    .settings(
+        name := "n-stream-nlib"
+    )
+    .settings(
+        libraryDependencies ++= nlibDeps
+    )
 
-   circleDep ++ akkaDep ++ testingDep
+lazy val transport = project.in(file("transport"))
+        .settings(
+          name := "n-stream-transport")
+        .settings(
+          libraryDependencies ++= transportDeps
+        )
+        .dependsOn(nlib)
+
+
+dockerfile in docker := {
+  val appDir: File = stage.value
+  val targetDir = "/app"
+
+  new Dockerfile {
+    from("java")
+    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
+    copy(appDir, targetDir)
+  }
 }
 
-lazy val root = project.in(file(".")).configs(IntegrationTest)
-
-initialCommands :=
-  """
-    |import scala.concurrent._
-    |import scala.concurrent.duration._""".stripMargin
-
-publishMavenStyle := true
-publishArtifact in Test := false
-pomIncludeRepository := { _ =>
-  false
-}
-// Todo:
-//publishTo := {
-//}
