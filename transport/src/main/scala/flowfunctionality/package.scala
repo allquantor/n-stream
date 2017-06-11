@@ -11,7 +11,6 @@ package object composedflow extends ScannerStreamFlow with
   lazy final val composerFlow = Flow[ScanResponse].map(_.getStringResponse)
     .map(scala.xml.XML.loadString _ andThen XmlResponse.apply)
 
-
   lazy final val ScanFlow = (scanRequest: ScanRequest) => { implicit materializer: Materializer =>
     Source.single(scanRequest)
       .via(webScannerStream)

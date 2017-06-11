@@ -1,5 +1,7 @@
 
 import Dependencies._
+import Settings.ArtifactorySettings.{PerseusRepositoryAddress, PerseusRepositoryName}
+import Settings.{ArtifactorySettings, commonSettingsPack}
 import sbt.Keys.mainClass
 
 //name := """n-stream"""
@@ -17,15 +19,18 @@ lazy val nstream = project.in(file("."))
     libraryDependencies ++= restDeps ++ nlibDeps,
     mainClass in Compile := Some("io.allquantor.nstream.Main")
   )
-  .aggregate(transport)
+  .dependsOn(nlib,transport)
+  .aggregate(transport,nlib)
   .enablePlugins(sbtdocker.DockerPlugin, JavaServerAppPackaging)
 
 lazy val data = project.in(file("data"))
   .settings(
-    name := "n-stream-data"
+    name := "n-stream-daa"
   )
 
 lazy val nlib = project.in(file("nlib"))
+    .configs(IntegrationTest)
+    .settings(commonSettingsPack: _*)
     .settings(
         name := "n-stream-nlib"
     )
@@ -36,11 +41,10 @@ lazy val nlib = project.in(file("nlib"))
 lazy val transport = project.in(file("transport"))
         .settings(
           name := "n-stream-transport")
-        .settings(
-          libraryDependencies ++= transportDeps
-        )
+        .configs(IntegrationTest)
+        .settings(libraryDependencies ++= transportDeps)
+        .settings(commonSettingsPack: _*)
         .dependsOn(nlib)
-
 
 dockerfile in docker := {
   val appDir: File = stage.value
@@ -52,4 +56,27 @@ dockerfile in docker := {
     copy(appDir, targetDir)
   }
 }
+
+
+// Initialization for artifactory.
+
+(sys.env.get("NE3_USERNAME"), sys.env.get("NE2_PASSWORD")) match {
+  case (Some(username), Some(password)) =>
+    println(s"Obtained credentials for ${username.drop(username.length/2)}****.")
+    credentials += Credentials(PerseusRepositoryName, PerseusRepositoryAddress, username, password)
+  case _ =>
+    println("NE3_USERNAME or NE2_PASSWORD is missing.")
+    credentials += Credentials(PerseusRepositoryName, PerseusRepositoryAddress, "", "")
+}
+
+publishTo <<= version { v: String =>
+  val nexus = s"http://$PerseusRepositoryAddress:8081/"
+  if (v.trim.endsWith("SNAPSHOT"))
+    Some("snapshots" at nexus + "repository/nstream-snapshots/")
+  else
+    Some("releases" at nexus + "repository/nstream-release/")
+}
+
+
+
 
